@@ -1,0 +1,227 @@
+<?xml version="1.0"?>
+
+<!-- 
+ This is ant build.xml file for building MaDKit 5 demos
+ Author: Fabien Michel
+ Version: 5.1
+ -->
+
+<project name="madkit-demos" default="release" basedir=".">
+
+	<!-- for using vars -->
+	<taskdef resource="net/sf/antcontrib/antcontrib.properties">
+		<classpath>
+			<pathelement location="lib/ant-contrib-1.0b3.jar" />
+		</classpath>
+	</taskdef>
+
+
+	<property name="import.line" value="${madkit.lib.dir}/madkit-${madkit.version}.jar" />
+
+	<!-- user's specific local properties -->
+	<property name="madkit.dir" value="../MaDKit" />
+
+	<!-- using the release's properties files -->
+	<property name="release.dir" value="release" />
+	<property name="demo.dir" value="${basedir}/release" />
+	<property name="lib.dir" value="lib" />
+	<property name="madkit.version" value="5.0.0.17" />
+	<property name="madkit.old.version" value="5.0.0.16" />
+	<property name="madkit.demos.dir" location="${madkit.dir}/demos" />
+	<property name="madkit.jar.file" value="../${madkit.dir}/release/madkit-${madkit.version}.jar" />
+	<property name="jnlps.web.dir" value="jnlps" />
+	<property name="demo.website" value="www.madkit.org" />
+	<property name="demo-lib.web.dir" value="MaDKit-${madkit.version}" />
+	<property name="demo.web.code.base" value="http://www.madkit.net/repository/jnlps" />
+	<property name="demo.author" value="MaDKit Team" />
+
+
+	<!-- ================================= 
+          target: publish              
+         ================================= -->
+	<target name="release" depends="clean" description="description">
+		<antcall target="doItOnAllmodules">
+			<param name="what.to.do" value="export-jars" />
+		</antcall>
+		<copy todir="${madkit.demos.dir}">
+			<fileset dir="${release.dir}" excludes="*.agents.jar,*.pack.gz" />
+		</copy>
+	</target>
+
+
+
+	<!-- ================================= 
+          target: clean              
+         ================================= -->
+	<target name="clean" description="cleanup build files">
+		<echo>Cleaning all demos</echo>
+		<antcall target="doItOnAllmodules">
+			<param name="what.to.do" value="clean" />
+		</antcall>
+		<delete dir="${release.dir}" failonerror="false" />
+		<delete>
+			<fileset dir="${madkit.demos.dir}" includes="MaDKit-ping-pong*,MaDKit-bees*,MaDKit-market-organization*" />
+		</delete>
+	</target>
+
+	<!-- ================================= 
+          target: zip-projects              
+         ================================= -->
+	<target name="zip-projects" description="zip projects">
+		<antcall target="doItOnAllmodules">
+			<param name="what.to.do" value="zip-project" />
+		</antcall>
+	</target>
+	
+	<!-- ================================= 
+	          target: test-exe              
+	         ================================= -->
+	<target name="test-exe" description="test the demo executable jars">
+		<exec executable="java" dir="${release.dir}">
+			<arg value="-jar" />
+			<arg value="MaDKit-bees-2.0.0.8.jar" />
+		</exec>
+		<exec executable="java" dir="${release.dir}">
+			<arg value="-jar" />
+			<arg value="MaDKit-market-organization-2.0.jar" />
+		</exec>
+		<exec executable="java" dir="${release.dir}">
+			<arg value="-jar" />
+			<arg value="MaDKit-ping-pong-2.0.jar" />
+		</exec>
+	</target>
+	
+	<!-- ================================= 
+          target: test-jnlp              
+         ================================= -->
+    <target name="test-jnlp" description="test jnlps">
+		<exec executable="javaws" dir="${release.dir}">
+			<arg value="MaDKit-bees.jnlp" />
+		</exec>
+		<exec executable="javaws" dir="${release.dir}">
+			<arg value="MaDKit-market-organization.jnlp" />
+		</exec>
+		<exec executable="javaws" dir="${release.dir}">
+			<arg value="MaDKit-ping-pong.jnlp" />
+		</exec>
+    </target>
+
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: create-lib-jars   
+    - - - - - - - - - - - - - - - - - -->
+	<target name="build-agent-jars" depends="" description="build the demo lib jars">
+		<antcall target="doItOnAllmodules">
+			<param name="what.to.do" value="build-agent-jar" />
+		</antcall>
+	</target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: create-jnlp   
+    - - - - - - - - - - - - - - - - - -->
+	<target name="jnlps" description="build the demo lib jars">
+		<antcall target="doItOnAllmodules">
+			<param name="what.to.do" value="Java-web-start" />
+		</antcall>
+	</target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: update-to-last-kernel                 
+         - - - - - - - - - - - - - - - - - -->
+	<target name="update-to-last-kernel">
+		<mkdir dir="${release.dir}" />
+
+		<property file="MaDKit-bees.properties" />
+
+		<copy tofile="MaDKit-bees/build.xml" file="demo-build-template.xml" overwrite="true">
+			<filterchain>
+				<expandproperties />
+			</filterchain>
+		</copy>
+
+		<!-- - - - - - - - - - - - - - - - - - 
+			does not work in a target !!!
+	         - - - - - - - - - - - - - - - - - -->
+		<var name="demo.version" unset="true" />
+		<var name="demo.code.name" unset="true" />
+		<var name="demo.author" unset="true" />
+		<var name="demo.description" unset="true" />
+		<var name="demo.label" unset="true" />
+		<var name="demo.args" unset="true" />
+		<property file="MaDKit-ping-pong.properties" />
+
+		<copy tofile="MaDKit-ping-pong/build.xml" file="demo-build-template.xml" overwrite="true">
+			<filterchain>
+				<expandproperties />
+			</filterchain>
+		</copy>
+
+		<var name="demo.version" unset="true" />
+		<var name="demo.code.name" unset="true" />
+		<var name="demo.author" unset="true" />
+		<var name="demo.description" unset="true" />
+		<var name="demo.label" unset="true" />
+		<var name="demo.args" unset="true" />
+		<property file="MaDKit-market-organization.properties" />
+
+		<copy tofile="MaDKit-market-organization/build.xml" file="demo-build-template.xml" overwrite="true">
+			<filterchain>
+				<expandproperties />
+			</filterchain>
+		</copy>
+
+		<antcall target="doItOnAllmodules">
+			<param name="what.to.do" value="update-to-last-kernel" />
+		</antcall>
+	</target>
+
+	<!-- ================================= 
+          target:       ftp-push-jnlp        
+         ================================= -->
+	<target name="ftp-push-jnlp" depends="jnlps">
+		<property name="server" value="MDK-jnlps" />
+		<property name="ftp.propfile" location="${user.home}/.mk_pass/${server}" />
+		<loadproperties srcFile="${ftp.propfile}" />
+		<echo>FTP upload of Demo JNLPs : target is ${ftp.server} ${ftp.dir}</echo>
+		<ftp server="${ftp.server}" userid="${ftp.user}" password="${ftp.password}" action="put" remotedir="${ftp.dir}">
+			<fileset dir="${release.dir}" includes="*.gz,*.jnlp" />
+		</ftp>
+	</target>
+
+	<!-- ================================= 
+          target:       ftp-push-agent-libs        
+         ================================= -->
+	<target name="ftp-push-agent-libs" depends="build-agent-jars" description="ftp demo libs">
+		<property name="server" value="MDK-demos" />
+		<property name="ftp.propfile" location="${user.home}/.mk_pass/${server}" />
+		<loadproperties srcFile="${ftp.propfile}" />
+		<ftp server="${ftp.server}" userid="${ftp.user}" password="${ftp.password}" action="mkdir" remotedir="${ftp.dir}/${demo-lib.web.dir}/demo"/>
+		<ftp server="${ftp.server}" userid="${ftp.user}" password="${ftp.password}" action="put" remotedir="${ftp.dir}/${demo-lib.web.dir}/demo">
+			<fileset dir="${release.dir}" includes="*.agents.jar" />
+		</ftp>
+		<ftp server="${ftp.server}" userid="${ftp.user}" password="${ftp.password}" action="put" remotedir="${ftp.dir}/${demo-lib.web.dir}">
+			<fileset dir="${basedir}" includes="repo.properties" />
+		</ftp>
+		<echo>FTP upload of Demo libs : target is ${ftp.server} ${ftp.dir}/${demo-lib.web.dir}</echo>
+	</target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: doItOnAllmodules                      
+         - - - - - - - - - - - - - - - - - -->
+	<target name="doItOnAllmodules">
+		<subant target="${what.to.do}" genericantfile="project.targets.xml" inheritall="true">
+			<dirset dir="." excludes=".git,${release.dir},lib" includes="*" />
+		</subant>
+	</target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: create-executable-jars   
+    - - - - - - - - - - - - - - - - - -->
+	<target name="create-executable-jars" depends="" description="build the demo executable jars">
+		<antcall target="doItOnAllmodules">
+			<param name="what.to.do" value="create-executable-jar" />
+		</antcall>
+	</target>
+
+</project>
+

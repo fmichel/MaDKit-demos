@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<!-- =================================
+ This is ant build.xml file for building ${demo.code.name}
+ Author: ${demo.author}
+ Version: ${demo.version}
+     ================================= -->
+
+<project name="${demo.code.name}" default="build-executable-jar">
+
+	<!-- =================================
+		REQUIRED:
+		 Please, specify the directory where the MaDKit jar file is in 
+		 e.g. 
+		 <property name="madkit.lib.dir" value="/userHome/madkit5"/>
+         ================================= -->
+	<property name="madkit.lib.dir" value="${lib.dir}" />
+
+	<!-- =================================
+		REQUIRED:
+		 Please, specify the MaDKit version which should be used.
+		 e.g. ${madkit.version}
+         ================================= -->
+	<property name="madkit.version" value="${madkit.version}" />
+
+	<!-- =================================
+		OPTIONAL:
+		 Here, you may set your project properties 
+         ================================= -->
+	<property name="src.dir" value="src" />
+	<property name="version" value="${demo.version}" />
+	<property name="author" value="${demo.author}" />
+	<property name="description" value="${demo.description}" />
+	<property name="project.label" value="${demo.label}" />
+	<property name="project.website" value="${demo.website}" />
+
+	<!-- =================================
+		OPTIONAL:
+		 Here, you can specify which default options
+		 will be used for the runnable jar 
+         ================================= -->
+	<property name="madkit.args" value="${demo.args}" />
+
+
+	<!-- =================================
+		OPTIONAL:
+		 A java web start file (.jnlp) could be also generated if possible.
+		 Here, you can specify the web directory in which you will 
+		 put the jar and the jnlp so that it will directly work without editing.
+         ================================= -->
+	<property name="web.codebase" value="${demo.web.code.base}" />
+
+
+
+	<!-- =================================
+        ================================= -->
+	<!-- =================================
+		DO NOT EDIT WHAT FOLLOWS:
+		 This defines the main targets from the madkit jar file.
+         ================================= -->
+	<import>
+		<javaresource name="MDK_ANT.xml">
+			<classpath location="${import.line}" />
+		</javaresource>
+	</import>
+
+</project>
+

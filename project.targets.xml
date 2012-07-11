@@ -1,0 +1,101 @@
+<?xml version="1.0"?>
+
+<!-- 
+ This is ant generic build.xml file for building MaDKit 5 demo releases
+ Author: Fabien Michel
+	<loadproperties srcFile="${MK.build.properties.file}"/>
+ Version: 5.0
+		<whichresource property="project.properties.file"
+		                 resource="project.properties"
+		                 classpathref="jar.path"/>
+	<property url="${project.properties.file}"/>
+ -->
+
+<project name="madkit-demos" default="zip-project" basedir=".">
+
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: zip-project                      
+         - - - - - - - - - - - - - - - - - -->
+	<target name="zip-project" depends="clean" description="build the demos for the release">
+		<ant antfile="build.xml" target="zip-project-src" />
+	</target>
+
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: clean                      
+         - - - - - - - - - - - - - - - - - -->
+	<target name="clean">
+		<ant antfile="build.xml" target="clean" />
+	</target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: create-executable-jar                      
+         - - - - - - - - - - - - - - - - - -->
+	<target name="create-executable-jar">
+		<ant antfile="build.xml" target="build-executable-jar" />
+	</target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: create-lib-jar                      
+         - - - - - - - - - - - - - - - - - -->
+	<target name="build-agent-jar">
+		<ant antfile="build.xml" target="build-agent-jar" />
+	</target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: create-lib-jar                      
+         - - - - - - - - - - - - - - - - - -->
+	<target name="Java-web-start">
+		<ant antfile="build.xml" target="Java-web-start" />
+	</target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: update-to-last-kernel                      
+		<property file="../${ant.project.name}.properties" />
+         - - - - - - - - - - - - - - - - - -->
+	<target name="update-to-last-kernel">
+		<copy todir="${lib.dir}" file="${madkit.jar.file}" />
+		<delete file="${lib.dir}/madkit-${madkit.old.version}.jar" />
+		<replace file="build.xml" token="${madkit.old.version}" value="${madkit.version}" />
+		<replace file=".classpath" token="${madkit.old.version}" value="${madkit.version}" />
+		<copy tofile="build.xml" file="../demo-build-template.xml">
+			<filterchain>
+				<expandproperties />
+			</filterchain>
+		</copy>
+
+	</target>
+
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: export-executable-jar         
+         - - - - - - - - - - - - - - - - - -->
+	<target name="export-jars">
+		<ant antfile="build.xml" target="build-executable-jar" />
+		<ant antfile="build.xml" target="build-agent-jar" />
+		<ant antfile="build.xml" target="Java-web-start" />
+		<copy todir="${demo.dir}">
+			<fileset dir="${basedir}" includes="*.jar,*.gz,*.jnlp" />
+		</copy>
+		<ant antfile="build.xml" target="zip-project-src" />
+		<copy todir="${demo.dir}">
+			<fileset dir="${basedir}" includes="*.zip" />
+		</copy>
+	</target>
+
+
+	<!-- =================================
+		OPTIONAL:
+		 Here, you may specify which resources should be 
+		 included in the jar file of your project
+         ================================= -->
+	<fileset dir="." id="resource.files">
+		<include name="${src.dir}/**" />
+		<include name="docs/**" />
+		<include name="build.xml" />
+	</fileset>
+
+
+
+</project>
