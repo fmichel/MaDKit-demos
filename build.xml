@@ -25,8 +25,8 @@
 	<property name="release.dir" value="release" />
 	<property name="demo.dir" value="${basedir}/release" />
 	<property name="lib.dir" value="lib" />
-	<property name="madkit.version" value="5.0.0.17" />
-	<property name="madkit.old.version" value="5.0.0.16" />
+	<property name="madkit.version" value="5.0.0.21" />
+	<property name="madkit.old.version" value="5.0.0.20" />
 	<property name="madkit.demos.dir" location="${madkit.dir}/demos" />
 	<property name="madkit.jar.file" value="../${madkit.dir}/release/madkit-${madkit.version}.jar" />
 	<property name="jnlps.web.dir" value="jnlps" />

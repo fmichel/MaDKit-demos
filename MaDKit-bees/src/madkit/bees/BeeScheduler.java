@@ -63,6 +63,10 @@ public class BeeScheduler extends madkit.kernel.Scheduler
 		receiveMessage(new SchedulingMessage(SchedulingAction.RUN));
 	}
 
+	/**
+	 * Overriding just for adding the multicore option
+	 * @see madkit.kernel.Scheduler#checkMail(madkit.kernel.Message)
+	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	protected void checkMail(Message m) {
@@ -70,31 +74,15 @@ public class BeeScheduler extends madkit.kernel.Scheduler
 			try {
 				boolean mutiCore = ((ObjectMessage<Boolean>) m).getContent();
 				if (mutiCore) {
-					bees.setMulticore(Runtime.getRuntime().availableProcessors());
+					bees.useMulticore(Runtime.getRuntime().availableProcessors());
 				}
 				else{
-					bees.setMulticore(1);
+					bees.useMulticore(1);
 				}
 			} catch (ClassCastException e) {
 				super.checkMail(m);//default behavior
 			}
 		}		 
 	}
-
-/* (non-Javadoc)
- * @see madkit.kernel.Scheduler#doSimulationStep()
- */
-//@Override
-//public void doSimulationStep() {
-//	long time = System.nanoTime();
-//	super.doSimulationStep();
-//	time = System.nanoTime() - time;
-//	System.err.println(time);
-//}
-//public void doSimulationStep() {
-//	bees.multicoreExecute();
-//	viewer.execute();
-//	setGVT(getGVT() + 1);
-//}
 
 }

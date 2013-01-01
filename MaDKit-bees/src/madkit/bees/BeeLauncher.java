@@ -39,7 +39,7 @@ public class BeeLauncher extends madkit.kernel.Agent
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -818685046449617220L;
+	private static final long	serialVersionUID	= 7558468322705057201L;
 	public static final String SIMU_GROUP = "bees";
 	public static final String BEE_ROLE = "bee";
 	public static final String QUEEN_ROLE = "queen";

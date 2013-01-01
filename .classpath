@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="MaDKit-bees/src"/>
+	<classpathentry kind="src" path="MaDKit-market-organization/src"/>
+	<classpathentry kind="src" path="MaDKit-ping-pong/src"/>
+	<classpathentry kind="lib" path="lib/ant-contrib-1.0b3.jar"/>
+	<classpathentry kind="lib" path="MaDKit-bees/lib/madkit-5.0.0.17.jar"/>
+	<classpathentry kind="lib" path="MaDKit-market-organization/lib/madkit-5.0.0.17.jar"/>
+	<classpathentry kind="lib" path="MaDKit-ping-pong/lib/madkit-5.0.0.17.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="output" path="MaDKit-ping-pong/bin"/>
+</classpath>
