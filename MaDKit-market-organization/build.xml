@@ -18,9 +18,9 @@
 	<!-- =================================
 		REQUIRED:
 		 Please, specify the MaDKit version which should be used.
-		 e.g. 5.0.0.21
+		 e.g. 5.0.2
          ================================= -->
-	<property name="madkit.version" value="5.0.0.21" />
+	<property name="madkit.version" value="5.0.2" />
 
 	<!-- =================================
 		OPTIONAL:

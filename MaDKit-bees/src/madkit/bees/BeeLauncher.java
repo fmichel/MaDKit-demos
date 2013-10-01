@@ -51,8 +51,8 @@ public class BeeLauncher extends madkit.kernel.Agent
 	//	public String communityID = COMMUNITY;
 
 	private int beenumber = 30000;
-	private ArrayList<AbstractAgent> queensList = new ArrayList<AbstractAgent>();
-	private ArrayList<AbstractAgent> beesList = new ArrayList<AbstractAgent>(beenumber*2);
+	private ArrayList<AbstractAgent> queensList = new ArrayList<>();
+	private ArrayList<AbstractAgent> beesList = new ArrayList<>(beenumber*2);
 	private boolean randomMode=true;
 	private BeeViewer beeViewer;
 	private boolean alive = true;
@@ -162,10 +162,10 @@ public class BeeLauncher extends madkit.kernel.Agent
 			logger.info("Launching "+numberOfBees+" bees");
 			beesList.addAll(
 					launchAgentBucket(
-							Bee.class.getName(), 
+							Bee.class.getName(),
 							numberOfBees, 
-							COMMUNITY+";"+SIMU_GROUP+";"+BEE_ROLE, 
-							COMMUNITY+";"+SIMU_GROUP+";"+FOLLOWER_ROLE));
+							COMMUNITY+","+SIMU_GROUP+","+BEE_ROLE, 
+							COMMUNITY+","+SIMU_GROUP+","+FOLLOWER_ROLE));
 	}	
 
 	private void launchQueens(int numberOfQueens)
@@ -173,10 +173,10 @@ public class BeeLauncher extends madkit.kernel.Agent
 		if(logger != null)
 			logger.info("Launching "+numberOfQueens+" queen bees");
 		queensList.addAll(launchAgentBucket(
-				QueenBee.class.getName(), 
+				QueenBee.class.getName(),
 				numberOfQueens, 
-				COMMUNITY+";"+SIMU_GROUP+";"+BEE_ROLE, 
-				COMMUNITY+";"+SIMU_GROUP+";"+QUEEN_ROLE));
+				COMMUNITY+","+SIMU_GROUP+","+BEE_ROLE, 
+				COMMUNITY+","+SIMU_GROUP+","+QUEEN_ROLE));
 	}	
 
 	private void killBees(boolean queen,int number)
@@ -204,7 +204,7 @@ public class BeeLauncher extends madkit.kernel.Agent
 	}
 
 	public static void main(String[] args) {
-		executeThisAgent(1,false);
+		executeThisAgent(1,false,args);
 	}
 
 }

@@ -32,13 +32,11 @@ import madkit.kernel.Agent;
  */
 public class PingPongDemoLauncherAgent extends Agent {
 
-
-
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -724796019973276140L;
-	private List<AbstractAgent> agentsList = new ArrayList<AbstractAgent>();
+	private List<AbstractAgent> agentsList = new ArrayList<>();
 
 	@Override
 	protected void activate() {
@@ -66,7 +64,7 @@ public class PingPongDemoLauncherAgent extends Agent {
 	
 	@Override
 	protected void live() {
-		pause(8000);
+		pause(6000);
 		int initialPause = 2000;
 		while(! agentsList.isEmpty()){
 			AbstractAgent a = agentsList.remove((int) (agentsList.size()*Math.random())); 

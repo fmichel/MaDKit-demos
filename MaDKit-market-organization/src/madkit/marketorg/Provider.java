@@ -1,5 +1,5 @@
 /*
- * Copyright 1997-2012 Fabien Michel, Olivier Gutknecht, Jacques Ferber
+ * Copyright 1997-2013 Fabien Michel, Olivier Gutknecht, Jacques Ferber
  * 
  * This file is part of MaDKit_Demos.
  * 
@@ -21,6 +21,10 @@ package madkit.marketorg;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Toolkit;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -30,7 +34,8 @@ import javax.swing.JPanel;
 import madkit.gui.OutputPanel;
 import madkit.kernel.Agent;
 import madkit.kernel.Message;
-import madkit.message.ObjectMessage;
+import madkit.message.IntegerMessage;
+import madkit.message.StringMessage;
 
 /**
  * @author Fabien Michel, Olivier Gutknecht, Jacques Ferber
@@ -39,71 +44,81 @@ import madkit.message.ObjectMessage;
  */
 public class Provider extends Agent
 {
+
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -4080055981945317639L;
-	private String competence;
-	static private int nbOfProvidersOnScreen=0;
-	private JPanel blinkPanel;
+	private static final long	serialVersionUID	= 9125493540160734521L;
 
+	public static List<String> availableTransports = Arrays.asList("train","boat","plane","bus");
+	
+	final private static Map<String,ImageIcon> icons = new HashMap<>();
+	static{
+		for (String competence : availableTransports) {
+			icons.put(competence,new ImageIcon(Provider.class.getResource("images/"+competence+".png")));
+		}
+	}
+
+	static private int nbOfProvidersOnScreen=0;
+
+	private String competence;
+	private JPanel blinkPanel;
 
 	public Provider()
 	{
-		competence = Broker.availableTransports.get((int) (Math.random()*Broker.availableTransports.size()));
+		competence = Provider.availableTransports.get((int) (Math.random()*Provider.availableTransports.size()));
 	}
 
 	public void activate()
 	{
-		createGroupIfAbsent("travel","travel-providers",true,null);
-		requestRole("travel","travel-providers",competence+"-provider",null);
+		createGroupIfAbsent(MarketOrganization.COMMUNITY,MarketOrganization.PROVIDERS_GROUP,true,null);
+		requestRole(MarketOrganization.COMMUNITY,MarketOrganization.PROVIDERS_GROUP,competence+"-"+MarketOrganization.PROVIDER_ROLE,null);
 	}
 
 
-	@SuppressWarnings("unchecked")
 	public void live()
 	{
 		while (true) {
 			Message m = waitNextMessage();
-			if (m.getSender().getRole().equals("broker"))
-				handleBrokerMessage((ObjectMessage<String>) m);
+			if (m.getSender().getRole().equals(MarketOrganization.BROKER_ROLE))
+				handleBrokerMessage((StringMessage) m);
 			else
-				finalizeContract((ObjectMessage<String>) m);
+				finalizeContract((StringMessage) m);
 		}
 	}
 
-	private void handleBrokerMessage(ObjectMessage<String> m) {
+	private void handleBrokerMessage(StringMessage m) {
 		if(m.getContent().equals("make-bid-please")){
 			if(logger != null)
 				logger.info("I received a call for bid from "+m.getSender());
-			sendReply(m, new ObjectMessage<Integer>((int) (Math.random()*500)));
+			sendReply(m, new IntegerMessage((int) (Math.random()*500)));
 		}
 		else{
 			iHaveBeenSelected(m);
 		}
 	}
 
-	private void iHaveBeenSelected(ObjectMessage<String> m) {
+	private void iHaveBeenSelected(StringMessage m) {
 		if (hasGUI()) {
 			blinkPanel.setBackground(Color.YELLOW);
 		}
 		if(logger != null)
 			logger.info("I have been selected :)");
 		String contractGroup = m.getContent();
-		createGroup("travel", contractGroup,true);
-		requestRole("travel", contractGroup, "provider");
+		createGroup(MarketOrganization.COMMUNITY, contractGroup,true);
+		requestRole(MarketOrganization.COMMUNITY, contractGroup, MarketOrganization.PROVIDER_ROLE);
 		sendReply(m, new Message()); // just an acknowledgment
 	}
 
-	private void finalizeContract(ObjectMessage<String> m) {
+	private void finalizeContract(StringMessage m) {
 		if (hasGUI()) {
 		blinkPanel.setBackground(Color.GREEN);
 		}
 		if(logger != null)
 			logger.info("I have sold something: That's great !");
-		sendReply(m, new ObjectMessage<String>("ticket"));
+		sendReply(m, new StringMessage("ticket"));
 		pause((int) (Math.random()*2000+1000));//let us celebrate !!
-		leaveGroup("travel", m.getSender().getGroup());
+		leaveGroup(MarketOrganization.COMMUNITY, m.getSender().getGroup());
 		if (hasGUI()) {
 			blinkPanel.setBackground(Color.LIGHT_GRAY);
 		}
@@ -112,10 +127,10 @@ public class Provider extends Agent
 	@Override
 	public void setupFrame(JFrame frame) {
 		JPanel p = new JPanel(new BorderLayout());
-		//customizing but still using the OutputPanel from MaDKit GUI
+		//customizing but still using the madkit.gui.OutputPanel.OutputPanel
 		p.add(new OutputPanel(this),BorderLayout.CENTER);
 		blinkPanel = new JPanel();
-		blinkPanel.add(new JLabel(new ImageIcon(getClass().getResource("images/"+competence+".png"))));
+		blinkPanel.add(new JLabel(icons.get(competence)));
 		p.add(blinkPanel,BorderLayout.NORTH);
 		blinkPanel.setBackground(Color.LIGHT_GRAY);
 		p.validate();
@@ -126,7 +141,6 @@ public class Provider extends Agent
 		frame.setLocation(xLocation, 640);
 		frame.setSize(300, 300);
 	}
-
 
 }
 

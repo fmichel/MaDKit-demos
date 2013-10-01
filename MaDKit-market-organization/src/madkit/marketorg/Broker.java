@@ -30,10 +30,13 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import madkit.action.AgentAction;
 import madkit.gui.OutputPanel;
 import madkit.kernel.Agent;
 import madkit.kernel.Message;
+import madkit.message.IntegerMessage;
 import madkit.message.ObjectMessage;
+import madkit.message.StringMessage;
 
 /**
  * @author Fabien Michel, Olivier Gutknecht, Jacques Ferber
@@ -47,97 +50,94 @@ public class Broker extends Agent
 	 * 
 	 */
 	private static final long serialVersionUID = 1217908977100108396L;
-	static int nbOfBrokersOnScreen=0;
-	private JPanel blinkPanel;
-	public static List<String> availableTransports = Arrays.asList("train","boat","plane","bus");
-	private static ImageIcon brokerImage= new ImageIcon(new ImageIcon(Client.class.getResource("images/broker.png")).getImage().getScaledInstance(70, 70, Image.SCALE_SMOOTH));
 
-	public void activate()
+	static int nbOfBrokersOnScreen=0;
+	
+	private static ImageIcon brokerImage= new ImageIcon(new ImageIcon(Broker.class.getResource("images/broker.png")).getImage().getScaledInstance(70, 70, Image.SCALE_SMOOTH));
+	private JPanel blinkPanel;
+
+	protected void activate()
 	{
-		createGroupIfAbsent("travel","travel-clients",true,null);
-		createGroupIfAbsent("travel","travel-providers",true,null);
-		requestRole("travel","travel-providers", "broker",null);
-		requestRole("travel","travel-clients", "broker",null);
+		createGroupIfAbsent(MarketOrganization.COMMUNITY,MarketOrganization.CLIENT_GROUP,true,null);
+		createGroupIfAbsent(MarketOrganization.COMMUNITY,MarketOrganization.PROVIDERS_GROUP,true,null);
+		requestRole(MarketOrganization.COMMUNITY,MarketOrganization.CLIENT_GROUP, MarketOrganization.BROKER_ROLE,null);
+		requestRole(MarketOrganization.COMMUNITY,MarketOrganization.PROVIDERS_GROUP, MarketOrganization.BROKER_ROLE,null);
 	}
 
 
-	@SuppressWarnings("unchecked")
-	public void live()
+	protected void live()
 	{
 		while (true)
 		{
-			Message m;
-			m = purgeMailbox();
+			Message m = purgeMailbox();//to always treat the last request
 			if (m == null) {
-				m = waitNextMessage();
+				m = waitNextMessage();//waiting a request
 			}
 			String role = m.getSender().getRole();
-			if(role.equals("client")){
-				handleClientRequest((ObjectMessage<String>) m);
+			if(role.equals(MarketOrganization.CLIENT_ROLE)){
+				handleClientRequest((StringMessage) m);
 			}
 		}
 	}
+	
+	@Override
+	protected void end() {
+		AgentAction.RELOAD.getActionFor(this).actionPerformed(null);
+	}
 
-	private void handleClientRequest(ObjectMessage<String> request) {
-		if(! request.getSender().exists())
+	private void handleClientRequest(StringMessage request) {
+		if(! request.getSender().exists()) //Is the client still there ?
 			return;
-		if (hasGUI()) {
+		if (hasGUI()) { // starting the contract net
 			blinkPanel.setBackground(Color.YELLOW);
 		}
 		if(logger != null)
 			logger.info("I received a request for a "+request.getContent()+" \nfrom "+request.getSender());
-		List<Message> bids = broadcastMessageWithRoleAndWaitForReplies(
-				"travel",
-				"travel-providers",  
-				request.getContent()+"-provider",
-				new ObjectMessage<String>("make-bid-please"),
-				"broker",
-				900);
-		if(bids == null){
+		List<Message> bids = broadcastMessageWithRoleAndWaitForReplies(//wait all answers
+				MarketOrganization.COMMUNITY, //community
+				MarketOrganization.PROVIDERS_GROUP, //group  
+				request.getContent()+"-"+MarketOrganization.PROVIDER_ROLE, //role
+				new StringMessage("make-bid-please"), //ask for a bid
+				MarketOrganization.BROKER_ROLE, //I am a broker
+				900); // I cannot wait the end of the universe
+		
+		if(bids == null){ // no reply
 			if(logger != null)
-				logger.info("No bids at all !!");
+				logger.info("No bids at all : No one is selling "+request.getContent().toUpperCase()+" !!\nPlease launch other providers !a");
 			if (hasGUI()) {
 				blinkPanel.setBackground(Color.LIGHT_GRAY);
 			}
 			return;
 		}
-		Message m = selectBestBid(bids);
-		if (m != null) {
-			if(logger != null)
-				logger.info("There is one interesting offer from "+m.getSender());
-			String contractGroupId = ""+System.nanoTime();
-			Message ack = sendMessageWithRoleAndWaitForReply(
-					m.getSender(),
-					new ObjectMessage<String>(contractGroupId), 
-					"broker",
-					1000);
-			if(ack == null){
-				if(logger != null)
-					logger.info("Provider disappears !!");
-				return;
-			}
-			if(logger != null)
+
+		// select the best offer
+		final List<IntegerMessage> offers = Arrays.asList(bids.toArray(new IntegerMessage[0]));//casting
+		IntegerMessage best = ObjectMessage.min(offers);
+		if (logger != null)
+			logger.info("The best offer is from " + best.getSender()+ " "+best.getContent());
+		
+		//creating a contract group
+		String contractGroupId = "" + System.nanoTime();
+		// sending the location to the provider
+		Message ack = sendMessageWithRoleAndWaitForReply(
+				best.getSender(), // the address of the provider
+				new StringMessage(contractGroupId), // send group's info
+				MarketOrganization.BROKER_ROLE, //I am a broker
+				1000); // I cannot wait the end of the universe
+
+		if (ack != null) {// The provider has entered the contract group
+			if (logger != null)
 				logger.info("Provider is ready !\nSending the contract number to client");
-			sendReply(request, new ObjectMessage<String>(contractGroupId)); 
-			pause((int) (Math.random()*2000+1000));//let us celebrate !!
+			sendReply(request, new StringMessage(contractGroupId)); // send group's info
+			pause((int) (Math.random() * 2000 + 1000));// let us celebrate !!
+		}
+		else{ //no answer from the provider...
+			if (logger != null)
+				logger.info("Provider disappears !!!!");
 		}
 		if (hasGUI()) {
 			blinkPanel.setBackground(Color.LIGHT_GRAY);
 		}
-	}
-
-
-
-	@SuppressWarnings("unchecked")
-	private Message selectBestBid(List<Message> bids) {
-		ObjectMessage<Integer> best = (ObjectMessage<Integer>) bids.get(0);
-		for(Message m : bids){
-			ObjectMessage<Integer> offer = (ObjectMessage<Integer>) m;
-			if(best.getContent() > offer.getContent()){
-				best = offer;
-			}
-		}
-		return best;
 	}
 
 	@Override

@@ -32,7 +32,7 @@ import madkit.message.ObjectMessage;
 /**
  * The leader of a group.
  * 
- * @version 2.0.0.2
+ * @version 2.0.0.3
  * @author Fabien Michel, Olivier Gutknecht 
 */
 public class QueenBee extends AbstractBee
@@ -40,7 +40,7 @@ public class QueenBee extends AbstractBee
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -179625947655014358L;
+	private static final long	serialVersionUID	= -6999130646300839798L;
 	static int border = 20;
 
 	@Override
@@ -49,7 +49,7 @@ public class QueenBee extends AbstractBee
 //		setLogLevel(Level.ALL);
 		Message m = nextMessage();
 		if(m != null){
-			sendReply(m, new ObjectMessage<BeeInformation>(myInformation));
+			sendReply(m, new ObjectMessage<>(myInformation));
 		}
 
 		super.buzz();
@@ -79,7 +79,7 @@ public class QueenBee extends AbstractBee
 //		setLogLevel(Level.ALL);
 		requestRole(COMMUNITY,SIMU_GROUP,QUEEN_ROLE,null);
 		requestRole(COMMUNITY,SIMU_GROUP,BEE_ROLE,null);
-		broadcastMessage(COMMUNITY,SIMU_GROUP,FOLLOWER_ROLE, new ObjectMessage<BeeInformation>(myInformation));
+		broadcastMessage(COMMUNITY,SIMU_GROUP,FOLLOWER_ROLE, new ObjectMessage<>(myInformation));
 		BeeViewer.nbOfBroadcast++;
 		if(logger != null)
 			logger.info("my initial location"+myInformation.getCurrentPosition());
@@ -89,7 +89,7 @@ public class QueenBee extends AbstractBee
 	protected void end() {
 		//informing follower that I am leaving
 		BeeViewer.nbOfBroadcast++;
-		broadcastMessage(COMMUNITY,SIMU_GROUP,FOLLOWER_ROLE, new ObjectMessage<BeeInformation>(myInformation));
+		broadcastMessage(COMMUNITY,SIMU_GROUP,FOLLOWER_ROLE, new ObjectMessage<>(myInformation));
 	}
 
 	@Override

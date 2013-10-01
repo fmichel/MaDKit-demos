@@ -63,7 +63,6 @@ public class PingPong extends Agent
 	/**
 	 * 
 	 */
-	@SuppressWarnings("unchecked")
 	private void searching() {
 		currentPartner = null; //searching a new partner
 		changeGUIColor(Color.WHITE);
@@ -84,11 +83,10 @@ public class PingPong extends Agent
 	/**
 	 * 
 	 */
-	@SuppressWarnings("unchecked")
 	private void playing() {
 		if (ball == null) {
 			ballColor = getRandomColor();
-			ball = (ObjectMessage<Color>) sendMessageAndWaitForReply(currentPartner, new ObjectMessage<Color>(ballColor),1300);
+			ball = (ObjectMessage<Color>) sendMessageAndWaitForReply(currentPartner, new ObjectMessage<>(ballColor),1300);
 			if(ball == null){ //nobody replied !
 				if(logger != null)
 					logger.info(currentPartner+" did not reply to me :( !! ");
@@ -101,7 +99,7 @@ public class PingPong extends Agent
 		}
 
 		changeGUIColor(ballColor);
-		ObjectMessage<Color> ballMessage = new ObjectMessage<Color>(ballColor);
+		ObjectMessage<Color> ballMessage = new ObjectMessage<>(ballColor);
 
 		for (int i = 0; i < 10 ; i++) {//if ball == null partner is gone !!
 			ball = (ObjectMessage<Color>) sendReplyAndWaitForReply(ball,ballMessage ,1300);

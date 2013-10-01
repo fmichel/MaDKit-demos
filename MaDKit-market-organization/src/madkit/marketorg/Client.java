@@ -34,7 +34,7 @@ import madkit.kernel.Madkit;
 import madkit.kernel.Madkit.LevelOption;
 import madkit.kernel.Madkit.Option;
 import madkit.kernel.Message;
-import madkit.message.ObjectMessage;
+import madkit.message.StringMessage;
 
 
 /**
@@ -47,46 +47,43 @@ public class Client extends Agent
 {
 	
 	static int nbOfClientsOnScreen = 0;
+	
 	private JPanel blinkPanel;
 	private static ImageIcon clientImage = new ImageIcon(new ImageIcon(Client.class.getResource("images/client.png")).getImage().getScaledInstance(70, 70, Image.SCALE_SMOOTH));
-	private String product = Broker.availableTransports.get((int) (Math.random()*Broker.availableTransports.size()));
+	private String product = Provider.availableTransports.get((int) (Math.random()*Provider.availableTransports.size()));
 
 	@Override
 	protected void activate()
 	{
-		createGroupIfAbsent("travel","travel-clients",true,null);
-		requestRole("travel","travel-clients", "client",null);
+		createGroupIfAbsent(MarketOrganization.COMMUNITY,MarketOrganization.CLIENT_GROUP,true,null);
+		requestRole(MarketOrganization.COMMUNITY,MarketOrganization.CLIENT_GROUP, MarketOrganization.CLIENT_ROLE,null);
 		int pause = 1000 + (int) (Math.random()*2000);
 		if(logger != null)
 			logger.info("I will be looking for a "+product+" in "+pause+" ms !");
 		pause(pause);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	protected void live()
-	{
+	protected void live() {
 		boolean haveTicket = false;
-		while (! haveTicket)
-		{
+		while (!haveTicket) {
 			Message brokerAnswer = null;
 			while (brokerAnswer == null) {
-					sendMessageWithRole(
-							"travel",
-							"travel-clients", 
-							"broker",
-							new ObjectMessage<String>(product), 
-							"client");
-					if(logger != null)
-						logger.info("Waiting for a broker answer...");
-					brokerAnswer = waitNextMessage(1000);
-					if(logger != null && brokerAnswer == null)
-						logger.info("For now there is nothing for me :(");
-				}
-			logFindBroker(brokerAnswer);// I found a broker and he found something for me
-			haveTicket = buyTicket((ObjectMessage<String>) brokerAnswer);
+				brokerAnswer = sendMessageWithRoleAndWaitForReply(
+						MarketOrganization.COMMUNITY, 
+						MarketOrganization.CLIENT_GROUP, 
+						MarketOrganization.BROKER_ROLE, 
+						new StringMessage(product), 
+						MarketOrganization.CLIENT_ROLE,
+						1000);
+				if (logger != null && brokerAnswer == null)
+					logger.info("For now there is nothing for me :(");
+				pause(500);
 			}
+			logFindBroker(brokerAnswer);// I found a broker and he found something for me
+			haveTicket = buyTicket((StringMessage) brokerAnswer);
 		}
+	}
 
 	@Override
 	protected void end() {
@@ -105,22 +102,21 @@ public class Client extends Agent
 		}
 	}
 
-	private boolean buyTicket(ObjectMessage<String> brokerAnswer) {
+	private boolean buyTicket(StringMessage brokerAnswer) {
 		String contractGroupID = brokerAnswer.getContent();
-		requestRole("travel",contractGroupID, "client");
-		Message ticket = sendMessageAndWaitForReply("travel", contractGroupID, "provider",new ObjectMessage<String>("money"), 4000);
+		requestRole(MarketOrganization.COMMUNITY,contractGroupID, MarketOrganization.CLIENT_ROLE);
+		Message ticket = sendMessageAndWaitForReply(MarketOrganization.COMMUNITY, contractGroupID, MarketOrganization.PROVIDER_ROLE,new StringMessage("money"), 4000);
 		if(ticket != null){
 			if(logger != null)
 				logger.info("Yeeeaah: I have my ticket :) ");
 			if (hasGUI()) {
 				blinkPanel.setBackground(Color.GREEN);
 			}
-			leaveGroup("travel", "travel-clients");
+			leaveGroup(MarketOrganization.COMMUNITY, MarketOrganization.CLIENT_GROUP);
 			pause((int) (1000+Math.random()*2000));
 			return true;
 		}
 		return false;
-
 	}
 
 	@Override
@@ -147,17 +143,10 @@ public class Client extends Agent
 	public static void main(String[] args) {
 		nbOfClientsOnScreen=0;
 		Broker.nbOfBrokersOnScreen=0;
-		String[] argss = {
-//				BooleanOption.network.toString()
-//				,BooleanOption.desktop.toString()
-//				,BooleanOption.autoConnectMadkitWebsite.toString()
-				LevelOption.agentLogLevel.toString(),"INFO",
-				LevelOption.kernelLogLevel.toString(),"OFF",
-				Option.launchAgents.toString(),
+		new Madkit(Option.launchAgents.toString(),
+								Broker.class.getName()+",true,3;"+
 								 Client.class.getName()+",true,2;"+
-								 Broker.class.getName()+",true,3;"+
 								 Provider.class.getName()+",true,7"
-		};
-		Madkit.main(argss);
+		);
 	}
 }

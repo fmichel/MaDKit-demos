@@ -20,16 +20,18 @@
 
 	<!-- user's specific local properties -->
 	<property name="madkit.dir" value="../MaDKit" />
+	<property name="mdk.store.dir" value=".mdk_keystore" />
 
 	<!-- using the release's properties files -->
 	<property name="release.dir" value="release" />
 	<property name="demo.dir" value="${basedir}/release" />
 	<property name="lib.dir" value="lib" />
-	<property name="madkit.version" value="5.0.0.21" />
-	<property name="madkit.old.version" value="5.0.0.20" />
+	<property name="madkit.version" value="5.0.2" />
+	<property name="madkit.old.version" value="5.0.1" />
 	<property name="madkit.demos.dir" location="${madkit.dir}/demos" />
 	<property name="madkit.jar.file" value="../${madkit.dir}/release/madkit-${madkit.version}.jar" />
 	<property name="jnlps.web.dir" value="jnlps" />
+	<property name="agents-lib.web.dir" value="agents" />
 	<property name="demo.website" value="www.madkit.org" />
 	<property name="demo-lib.web.dir" value="MaDKit-${madkit.version}" />
 	<property name="demo.web.code.base" value="http://www.madkit.net/repository/jnlps" />
@@ -180,7 +182,7 @@
          ================================= -->
 	<target name="ftp-push-jnlp" depends="jnlps">
 		<property name="server" value="MDK-jnlps" />
-		<property name="ftp.propfile" location="${user.home}/.mk_pass/${server}" />
+		<property name="ftp.propfile" location="${user.home}/${mdk.store.dir}/${server}" />
 		<loadproperties srcFile="${ftp.propfile}" />
 		<echo>FTP upload of Demo JNLPs : target is ${ftp.server} ${ftp.dir}</echo>
 		<ftp server="${ftp.server}" userid="${ftp.user}" password="${ftp.password}" action="put" remotedir="${ftp.dir}">
@@ -193,14 +195,11 @@
          ================================= -->
 	<target name="ftp-push-agent-libs" depends="build-agent-jars" description="ftp demo libs">
 		<property name="server" value="MDK-demos" />
-		<property name="ftp.propfile" location="${user.home}/.mk_pass/${server}" />
+		<property name="ftp.propfile" location="${user.home}/${mdk.store.dir}/${server}" />
 		<loadproperties srcFile="${ftp.propfile}" />
-		<ftp server="${ftp.server}" userid="${ftp.user}" password="${ftp.password}" action="mkdir" remotedir="${ftp.dir}/${demo-lib.web.dir}/demo"/>
-		<ftp server="${ftp.server}" userid="${ftp.user}" password="${ftp.password}" action="put" remotedir="${ftp.dir}/${demo-lib.web.dir}/demo">
+		<ftp server="${ftp.server}" userid="${ftp.user}" password="${ftp.password}" action="mkdir" remotedir="${ftp.dir}/${demo-lib.web.dir}/${agents-lib.web.dir}"/>
+		<ftp server="${ftp.server}" userid="${ftp.user}" password="${ftp.password}" action="put" remotedir="${ftp.dir}/${demo-lib.web.dir}/${agents-lib.web.dir}">
 			<fileset dir="${release.dir}" includes="*.agents.jar" />
-		</ftp>
-		<ftp server="${ftp.server}" userid="${ftp.user}" password="${ftp.password}" action="put" remotedir="${ftp.dir}/${demo-lib.web.dir}">
-			<fileset dir="${basedir}" includes="repo.properties" />
 		</ftp>
 		<echo>FTP upload of Demo libs : target is ${ftp.server} ${ftp.dir}/${demo-lib.web.dir}</echo>
 	</target>

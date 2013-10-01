@@ -60,6 +60,7 @@ import madkit.bees.BeeLauncher.BeeLauncherAction;
 import madkit.gui.SwingUtil;
 import madkit.gui.menu.AgentLogLevelMenu;
 import madkit.gui.menu.AgentMenu;
+import madkit.gui.menu.LaunchAgentsMenu;
 import madkit.gui.menu.MadkitMenu;
 import madkit.kernel.Watcher;
 import madkit.message.EnumMessage;
@@ -189,11 +190,13 @@ public class BeeViewer extends SwingViewer {
 
 	@Override
 	public void setupFrame(JFrame frame) {
+		super.setupFrame(frame);
 		buildActions(frame);
 		frame.setBackground(Color.black);
 		JMenuBar jmenubar = new JMenuBar();
 		jmenubar.add(new MadkitMenu(this));
 		jmenubar.add(new AgentMenu(this));
+		jmenubar.add(new LaunchAgentsMenu(this));
 		jmenubar.add(new AgentLogLevelMenu(this));
 		jmenubar.add(sch.getSchedulerMenu());
 		//TODO implement something to do that
@@ -325,7 +328,7 @@ public class BeeViewer extends SwingViewer {
 						community, 
 						SIMU_GROUP, 
 						LAUNCHER_ROLE, 
-						new EnumMessage<BeeLauncherAction>(BeeLauncherAction.RANDOM_MODE, randomMode.getValue(SELECTED_KEY)));
+						new EnumMessage<>(BeeLauncherAction.RANDOM_MODE, randomMode.getValue(SELECTED_KEY)));
 			}
 		};
 		initActionIcon(randomMode, "Random mode: Randomly launch or kill bees","random");
@@ -334,7 +337,7 @@ public class BeeViewer extends SwingViewer {
 		multicoreMode = new AbstractAction("Multicore mode"){
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				sendMessage(community, SIMU_GROUP, BeeLauncher.SCHEDULER_ROLE, new ObjectMessage<Boolean>((Boolean) multicoreMode.getValue(SELECTED_KEY)));
+				sendMessage(community, SIMU_GROUP, BeeLauncher.SCHEDULER_ROLE, new ObjectMessage<>((Boolean) multicoreMode.getValue(SELECTED_KEY)));
 			}
 		};
 		initActionIcon(multicoreMode, "Multicore mode: Use several processor cores if available (more efficient if synchro painting is off","multicore");
@@ -371,7 +374,7 @@ public class BeeViewer extends SwingViewer {
 				community, 
 				SIMU_GROUP, 
 				LAUNCHER_ROLE, 
-		new EnumMessage<BeeLauncherAction>(BeeLauncherAction.LAUNCH_BEES,nb)); 
+		new EnumMessage<>(BeeLauncherAction.LAUNCH_BEES,nb)); 
 		
 	}
 
