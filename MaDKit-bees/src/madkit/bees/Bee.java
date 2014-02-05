@@ -123,8 +123,8 @@ public class Bee extends AbstractBee
 	public void activate()
 	{
 //		setLogLevel(Level.INFO);
-		bucketModeRequestRole("buzz",SIMU_GROUP,"bee",null);
-		bucketModeRequestRole("buzz",SIMU_GROUP,"follower",null);
+		requestRole("buzz",SIMU_GROUP,"bee",null);
+		requestRole("buzz",SIMU_GROUP,"follower",null);
 	}
 
 

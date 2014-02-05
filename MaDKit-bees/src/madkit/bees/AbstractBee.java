@@ -58,7 +58,7 @@ public abstract class AbstractBee extends AbstractAgent
 
 	protected void buzz()
 	{
-		Point location = myInformation.getCurrentPosition();
+		final Point location = myInformation.getCurrentPosition();
 		myInformation.getPreviousPosition().setLocation(location);
 
 		computeNewVelocities();
@@ -105,8 +105,8 @@ public abstract class AbstractBee extends AbstractAgent
 				myLocation.y > beeWorld.getHeight() ||
 				myLocation.x <= 0 ||
 				myLocation.y <= 0){
-			myInformation.getCurrentPosition().setLocation(generator.nextInt(beeWorld.getWidth() - 20) + 10, generator.nextInt(beeWorld.getHeight() - 20) + 10);
-			myInformation.getPreviousPosition().setLocation(myInformation.getCurrentPosition());
+			myLocation.setLocation(generator.nextInt(beeWorld.getWidth() - 20) + 10, generator.nextInt(beeWorld.getHeight() - 20) + 10);
+			myInformation.getPreviousPosition().setLocation(myLocation);
 		}
 		int beeMAcceleration = beeWorld.getBeeAcceleration().getValue();
 		dX = randomFromRange(beeMAcceleration);
