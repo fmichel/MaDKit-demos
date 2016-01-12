@@ -86,7 +86,7 @@ public class Broker extends Agent
 	}
 
 	private void handleClientRequest(StringMessage request) {
-		if(! request.getSender().exists()) //Is the client still there ?
+		if(! checkAgentAddress(request.getSender())) //Is the client still there ?
 			return;
 		if (hasGUI()) { // starting the contract net
 			blinkPanel.setBackground(Color.YELLOW);

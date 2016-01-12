@@ -85,7 +85,6 @@ public class Bee extends AbstractBee
 	/**
 	 * 
 	 */
-	@SuppressWarnings("unchecked")
 	private void updateLeader() {
 		ObjectMessage<BeeInformation> m = (ObjectMessage<BeeInformation>) nextMessage();
 		if(m == null){

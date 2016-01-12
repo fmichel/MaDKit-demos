@@ -35,7 +35,6 @@ public class PingPongDemoLauncherAgent extends Agent {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -724796019973276140L;
 	private List<AbstractAgent> agentsList = new ArrayList<>();
 
 	@Override

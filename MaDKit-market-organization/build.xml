@@ -18,9 +18,9 @@
 	<!-- =================================
 		REQUIRED:
 		 Please, specify the MaDKit version which should be used.
-		 e.g. 5.0.3.2
+		 e.g. 5.0.5.3
          ================================= -->
-	<property name="madkit.version" value="5.0.3.2" />
+	<property name="madkit.version" value="5.0.5.3" />
 
 	<!-- =================================
 		OPTIONAL:
@@ -47,7 +47,7 @@
 		 Here, you can specify the web directory in which you will 
 		 put the jar and the jnlp so that it will directly work without editing.
          ================================= -->
-	<property name="web.codebase" value="http://www.madkit.net/repository/jnlps" />
+	<property name="web.codebase" value="http://www.madkit.net/madkit/javaws" />
 
 
 

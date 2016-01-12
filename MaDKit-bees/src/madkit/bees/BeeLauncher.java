@@ -82,6 +82,9 @@ public class BeeLauncher extends madkit.kernel.Agent
 		launchAgent(beeViewer,true);
 
 		launchAgent(beeScheduler,false);
+		
+		pause(4000);
+		launchQueens(1);
 
 	}
 

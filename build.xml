@@ -26,15 +26,15 @@
 	<property name="release.dir" value="release" />
 	<property name="demo.dir" value="${basedir}/release" />
 	<property name="lib.dir" value="lib" />
-	<property name="madkit.version" value="5.0.3.2" />
-	<property name="madkit.old.version" value="5.0.3.1" />
+	<property name="madkit.version" value="5.0.5.3" />
+	<property name="madkit.old.version" value="5.0.5.2" />
 	<property name="madkit.demos.dir" location="${madkit.dir}/demos" />
 	<property name="madkit.jar.file" value="../${madkit.dir}/release/madkit-${madkit.version}.jar" />
 	<property name="jnlps.web.dir" value="jnlps" />
 	<property name="agents-lib.web.dir" value="agents" />
 	<property name="demo.website" value="www.madkit.org" />
 	<property name="demo-lib.web.dir" value="MaDKit-${madkit.version}" />
-	<property name="demo.web.code.base" value="http://www.madkit.net/repository/jnlps" />
+	<property name="demo.web.code.base" value="http://www.madkit.net/madkit/javaws" />
 	<property name="demo.author" value="MaDKit Team" />
 
 
@@ -74,7 +74,7 @@
 			<param name="what.to.do" value="zip-project" />
 		</antcall>
 	</target>
-	
+
 	<!-- ================================= 
 	          target: test-exe              
 	         ================================= -->
@@ -92,11 +92,11 @@
 			<arg value="MaDKit-ping-pong-2.0.jar" />
 		</exec>
 	</target>
-	
+
 	<!-- ================================= 
           target: test-jnlp              
          ================================= -->
-    <target name="test-jnlp" description="test jnlps">
+	<target name="test-jnlp" description="test jnlps">
 		<exec executable="javaws" dir="${release.dir}">
 			<arg value="MaDKit-bees.jnlp" />
 		</exec>
@@ -106,7 +106,7 @@
 		<exec executable="javaws" dir="${release.dir}">
 			<arg value="MaDKit-ping-pong.jnlp" />
 		</exec>
-    </target>
+	</target>
 
 
 	<!-- - - - - - - - - - - - - - - - - - 
@@ -181,11 +181,9 @@
           target:       ftp-push-jnlp        
          ================================= -->
 	<target name="ftp-push-jnlp" depends="jnlps">
-		<property name="server" value="MDK-jnlps" />
-		<property name="ftp.propfile" location="${user.home}/${mdk.store.dir}/${server}" />
-		<loadproperties srcFile="${ftp.propfile}" />
-		<echo>FTP upload of Demo JNLPs : target is ${ftp.server} ${ftp.dir}</echo>
-		<ftp server="${ftp.server}" userid="${ftp.user}" password="${ftp.password}" action="put" remotedir="${ftp.dir}">
+		<loadproperties srcFile="${user.home}/${mdk.store.dir}/MDK.net" />
+		<echo>FTP upload of Demo JNLPs</echo>
+		<ftp server="${ftp.server}" userid="${ftp.user}" password="${ftp.password}" action="put" remotedir="madkit/javaws">
 			<fileset dir="${release.dir}" includes="*.gz,*.jnlp" />
 		</ftp>
 	</target>

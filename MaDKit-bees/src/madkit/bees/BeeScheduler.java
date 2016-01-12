@@ -53,9 +53,9 @@ public class BeeScheduler extends madkit.kernel.Scheduler
 		setLogLevel(Level.ALL);
 		setLogLevel(Level.OFF);
 		requestRole("buzz",SIMU_GROUP,SCHEDULER_ROLE,null);
-		bees = new GenericBehaviorActivator<AbstractBee>(community,SIMU_GROUP,BEE_ROLE,"buzz");
+		bees = new GenericBehaviorActivator<>(community,SIMU_GROUP,BEE_ROLE,"buzz");
 		addActivator(bees);
-		viewer = new GenericBehaviorActivator<BeeViewer>(community,SIMU_GROUP,"bee observer","observe");
+		viewer = new GenericBehaviorActivator<>(community,SIMU_GROUP,"bee observer","observe");
 		addActivator(viewer);
 		setDelay(20);
 		setDelay(0);

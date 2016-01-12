@@ -34,7 +34,6 @@ import madkit.message.ObjectMessage;
  * @version 5.1
  * 
  */
-@SuppressWarnings("serial")
 public class PingPong extends Agent
 {
 	private AgentAddress currentPartner = null;

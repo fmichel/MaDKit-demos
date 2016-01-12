@@ -310,10 +310,11 @@ public class BeeViewer extends SwingViewer {
 		synchroPaint = new AbstractAction("Synchronous painting"){
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				setSynchronousPainting((Boolean) synchroPaint.getValue(Action.SELECTED_KEY));
+				setSynchronousPainting(! (Boolean) synchroPaint.getValue(Action.SELECTED_KEY));
 			}
 		};
-		initActionIcon(synchroPaint, "Paint all the simulation steps: Don't miss any move","synchroPaint");
+		initActionIcon(synchroPaint, "Deactivate the synchronous painting mode (faster)","synchroPaint");
+		synchroPaint.putValue(Action.SELECTED_KEY, false);
 		artMode = new AbstractAction("Art mode"){
 			@Override
 			public void actionPerformed(ActionEvent e) {
