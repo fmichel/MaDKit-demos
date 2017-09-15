@@ -25,139 +25,126 @@ import java.util.Random;
 import madkit.kernel.AbstractAgent;
 
 /**
- * @version 2.0.0.3
+ * @version 2.3
  * @author Fabien Michel
  */
-public abstract class AbstractBee extends AbstractAgent
-{
+public abstract class AbstractBee extends AbstractAgent {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -3781069534623890714L;
+    protected static final Random generator = new Random(System.currentTimeMillis());
 
-	final protected static Random generator = new Random(System.currentTimeMillis());
+    protected int dX; // current velocity in x dir
+    protected int dY; // current velocity in y dir
 
-	public BeeInformation myInformation;//public visibility speeds up the probing process
-	
-	protected int dX;		// current velocity in x dir
-	protected int dY;		// current velocity in y dir
+    protected BeeEnvironment beeWorld;
 
-	protected BeeEnvironment beeWorld;
+    protected BeeInformation myInformation;
 
-	public AbstractBee()
-	{
-		myInformation = new BeeInformation();
-	}
-	
-	@Override
-	public String toString() {
-		return getClass().getSimpleName()+" on "+beeWorld+" "+myInformation;
-	}
+    public AbstractBee() {
+	myInformation = new BeeInformation();
+    }
 
+    /**
+     * 
+     * Automatically called by the {@link BeeViewer} when
+     *  the agent takes its social position
+     * 
+     * @param environment
+     */
+    public void setEnvironment(BeeEnvironment environment) {
+        beeWorld = environment;
+        final Point myLocation = myInformation.getCurrentPosition();
+        if (myLocation.x > beeWorld.getWidth() || myLocation.y > beeWorld.getHeight() || myLocation.x <= 0 || myLocation.y <= 0) {
+            myLocation.setLocation(generator.nextInt(beeWorld.getWidth() - 20) + 10, generator.nextInt(beeWorld.getHeight() - 20) + 10);
+            myInformation.getPreviousPosition().setLocation(myLocation);
+        }
+        int beeMAcceleration = beeWorld.getBeeAcceleration().getValue();
+        dX = randomFromRange(beeMAcceleration);
+        dY = randomFromRange(beeMAcceleration);
+    }
 
-	protected void buzz()
-	{
-		final Point location = myInformation.getCurrentPosition();
-		myInformation.getPreviousPosition().setLocation(location);
+    @Override
+    public String toString() {
+	return getClass().getSimpleName() + " on " + beeWorld + " " + myInformation;
+    }
 
-		computeNewVelocities();
-		normalizeVelocities(getMaxVelocity());
-		// update the bee's position
-		location.x += dX;
-		location.y += dY;
-		
-	}
+    protected void buzz() {
+	final Point location = myInformation.getCurrentPosition();
+	myInformation.getPreviousPosition().setLocation(location);
 
+	computeNewVelocities();
+	normalizeVelocities(getMaxVelocity());
+	// update the bee's position
+	location.x += dX;
+	location.y += dY;
 
-	protected abstract int getMaxVelocity();
+    }
 
-	protected abstract void computeNewVelocities();
+    protected abstract int getMaxVelocity();
 
+    protected abstract void computeNewVelocities();
 
-	private void normalizeVelocities(int maxVelocity) {
-		// keep speed limited to maximums
-		if (dX > maxVelocity)
-			dX = maxVelocity;
-		else
-			if (dX < -maxVelocity)
-				dX = -maxVelocity;
+    private void normalizeVelocities(int maxVelocity) {
+	// keep speed limited to maximums
+	if (dX > maxVelocity)
+	    dX = maxVelocity;
+	else if (dX < -maxVelocity)
+	    dX = -maxVelocity;
 
-		if (dY > maxVelocity)
-			dY = maxVelocity;
-		else
-			if (dY < -maxVelocity)
-				dY = -maxVelocity;
-	}
+	if (dY > maxVelocity)
+	    dY = maxVelocity;
+	else if (dY < -maxVelocity)
+	    dY = -maxVelocity;
+    }
 
-
-	public int randomFromRange(int val)
-	{
-		val /= 2;
-		return generator.nextInt(val*2+1) - val;
-	}
-
-	public void setEnvironment(BeeEnvironment bw)
-	{
-		beeWorld = bw;
-		final Point myLocation = myInformation.getCurrentPosition();
-		if (myLocation.x > beeWorld.getWidth() || 
-				myLocation.y > beeWorld.getHeight() ||
-				myLocation.x <= 0 ||
-				myLocation.y <= 0){
-			myLocation.setLocation(generator.nextInt(beeWorld.getWidth() - 20) + 10, generator.nextInt(beeWorld.getHeight() - 20) + 10);
-			myInformation.getPreviousPosition().setLocation(myLocation);
-		}
-		int beeMAcceleration = beeWorld.getBeeAcceleration().getValue();
-		dX = randomFromRange(beeMAcceleration);
-		dY = randomFromRange(beeMAcceleration);      
-	}
+    public int randomFromRange(int val) {
+	val /= 2;
+	return generator.nextInt(val * 2 + 1) - val;
+    }
 
 }
-
 
 class BeeInformation {
-	final private Point currentPosition, previousPosition;
-	private Color beeColor;
-	
-	public BeeInformation() {
-		currentPosition = new Point();
-		previousPosition = new Point();
-		beeColor = Color.getHSBColor(AbstractBee.generator.nextFloat(),1.0f,1.0f);
-	}
 
-	/**
-	 * @return the currentPosition
-	 */
-	public Point getCurrentPosition() {
-		return currentPosition;
-	}
+    private final Point currentPosition, previousPosition;
+    private Color beeColor;
 
-	/**
-	 * @return the previousPosition
-	 */
-	public Point getPreviousPosition() {
-		return previousPosition;
-	}
-	
-	@Override
-	public String toString() {
-		return "<"+previousPosition+","+currentPosition+">";
-	}
+    public BeeInformation() {
+	currentPosition = new Point();
+	previousPosition = new Point();
+	beeColor = Color.getHSBColor(AbstractBee.generator.nextFloat(), 1.0f, 1.0f);
+    }
 
+    /**
+     * @return the currentPosition
+     */
+    public Point getCurrentPosition() {
+	return currentPosition;
+    }
 
-	/**
-	 * @return the beeColor
-	 */
-	public Color getBeeColor() {
-		return beeColor;
-	}
+    /**
+     * @return the previousPosition
+     */
+    public Point getPreviousPosition() {
+	return previousPosition;
+    }
 
-	/**
-	 * @param beeColor the beeColor to set
-	 */
-	public void setBeeColor(Color beeColor) {
-		this.beeColor = beeColor;
-	}
+    @Override
+    public String toString() {
+	return "<" + previousPosition + "," + currentPosition + ">";
+    }
+
+    /**
+     * @return the beeColor
+     */
+    public Color getBeeColor() {
+	return beeColor;
+    }
+
+    /**
+     * @param beeColor
+     *            the beeColor to set
+     */
+    public void setBeeColor(Color beeColor) {
+	this.beeColor = beeColor;
+    }
 }
-

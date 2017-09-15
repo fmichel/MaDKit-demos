@@ -24,117 +24,100 @@ import static madkit.bees.BeeLauncher.SIMU_GROUP;
 
 import java.awt.Point;
 import java.util.List;
+import java.util.logging.Level;
 
 import madkit.kernel.AgentAddress;
 import madkit.message.ObjectMessage;
 
 /**
- * @version 2.0.0.2
- * @author Fabien Michel, Olivier Gutknecht 
-*/
-public class Bee extends AbstractBee
-{
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -2393301912353816186L;
-	BeeInformation leaderInfo = null;
-	AgentAddress leader = null;
+ * @version 2.3
+ * @author Fabien Michel, Olivier Gutknecht
+ */
+public class Bee extends AbstractBee {
 
+    private static final long serialVersionUID = -2393301912353816186L;
+    BeeInformation leaderInfo = null;
+    AgentAddress leader = null;
 
-	/** The "do it" method called by the activator */
-	public void buzz()
-	{
-		updateLeader();
-		super.buzz();
-	}  
-	
-	@Override
-	protected void computeNewVelocities() {
-		final Point location = myInformation.getCurrentPosition();
-		int dtx, dty, dist;		// distances from bee to queen
-		int acc = 0;
-		if (beeWorld != null) {
-			acc = beeWorld.getBeeAcceleration().getValue();
-		}
-		if (leaderInfo != null)
-		{
-			final Point leaderLocation = leaderInfo.getCurrentPosition();
-			if(logger != null)
-				logger.finer("following leader :"+leaderLocation);
-			dtx = leaderLocation.x - location.x;
-			dty = leaderLocation.y - location.y;
-		}
-		else
-		{
-			dtx = generator.nextInt(5);
-			dty = generator.nextInt(5);
-			if(generator.nextBoolean()){
-				dtx = -dtx;
-				dty = -dty;
-			}
-		}	
-		dist = Math.abs(dtx) + Math.abs(dty);
-		if (dist == 0) 
-			dist = 1;		// avoid dividing by zero
-		// the randomFromRange adds some extra jitter to prevent the bees from flying in formation
-		dX += ((dtx * acc )/dist) + randomFromRange(2);
-		dY += ((dty * acc )/dist) + randomFromRange(2);
+    @Override
+    public void activate() {
+	requestRole("buzz", SIMU_GROUP, "bee", null);
+	requestRole("buzz", SIMU_GROUP, "follower", null);
+    }
+
+    /** The "do it" method called by the activator */
+    @Override
+    public void buzz() {
+	updateLeader();
+	super.buzz();
+    }
+
+    private void updateLeader() {
+	ObjectMessage<BeeInformation> m = (ObjectMessage<BeeInformation>) nextMessage();
+	if (m == null) {
+	    return;
 	}
-
-	/**
-	 * 
-	 */
-	private void updateLeader() {
-		ObjectMessage<BeeInformation> m = (ObjectMessage<BeeInformation>) nextMessage();
-		if(m == null){
-			return;
-		}
-		if(m.getSender().equals(leader)){
-			if(logger != null)
-				logger.info("my leader is getting out of the game");
-			leader = null;
-			leaderInfo = null;
-		}
-		else{
-			if(logger != null)
-				logger.fine("A leader has appeared or disappeared ");
-			if(leader == null)
-				followNewLeader(m);
-			else{
-				List<AgentAddress> queens = getAgentsWithRole(COMMUNITY, SIMU_GROUP, QUEEN_ROLE);
-				if(queens != null && generator.nextDouble() < (1.0 / queens.size())){
-					followNewLeader(m);
-				}
-			}
-		}
-
+	if (m.getSender().equals(leader)) {// leader quitting
+	    leader = null;
+	    leaderInfo = null;
 	}
-	/**
-	 * @param leaderMessage
-	 */
-	private void followNewLeader(ObjectMessage<BeeInformation> leaderMessage) {
-		leader = leaderMessage.getSender();
-		leaderInfo = leaderMessage.getContent();
-		myInformation.setBeeColor(leaderInfo.getBeeColor());
-	}
-
-	public void activate()
-	{
-//		setLogLevel(Level.INFO);
-		requestRole("buzz",SIMU_GROUP,"bee",null);
-		requestRole("buzz",SIMU_GROUP,"follower",null);
-	}
-
-
-	/* (non-Javadoc)
-	 * @see madkit.demos.bees.AbstractBee#getMaxVelocity()
-	 */
-	@Override
-	protected int getMaxVelocity() {
-		if (beeWorld != null) {
-			return beeWorld.getBeeVelocity().getValue();
+	else {
+	    if (leader == null)
+		followNewLeader(m);
+	    else {
+		List<AgentAddress> queens = getAgentsWithRole(COMMUNITY, SIMU_GROUP, QUEEN_ROLE);
+		if (queens != null && generator.nextDouble() < (1.0 / queens.size())) {// change leader randomly
+		    followNewLeader(m);
 		}
-		return 0;
+	    }
 	}
+    }
+
+    /**
+     * @param leaderMessage
+     */
+    private void followNewLeader(ObjectMessage<BeeInformation> leaderMessage) {
+	leader = leaderMessage.getSender();
+	leaderInfo = leaderMessage.getContent();
+	myInformation.setBeeColor(leaderInfo.getBeeColor());
+    }
+
+    @Override
+    protected void computeNewVelocities() {
+	final Point location = myInformation.getCurrentPosition();
+	// distances from bee to queen
+	int dtx;
+	int dty;
+	if (leaderInfo != null) {
+	    final Point leaderLocation = leaderInfo.getCurrentPosition();
+	    dtx = leaderLocation.x - location.x;
+	    dty = leaderLocation.y - location.y;
+	}
+	else {
+	    dtx = generator.nextInt(5);
+	    dty = generator.nextInt(5);
+	    if (generator.nextBoolean()) {
+		dtx = -dtx;
+		dty = -dty;
+	    }
+	}
+	int acc = 0;
+	if (beeWorld != null) {
+	    acc = beeWorld.getBeeAcceleration().getValue();
+	}
+	int dist = Math.abs(dtx) + Math.abs(dty);
+	if (dist == 0)
+	    dist = 1; // avoid dividing by zero
+	// the randomFromRange adds some extra jitter to prevent the bees from flying in formation
+	dX += ((dtx * acc) / dist) + randomFromRange(2);
+	dY += ((dty * acc) / dist) + randomFromRange(2);
+    }
+
+    @Override
+    protected int getMaxVelocity() {
+	if (beeWorld != null) {
+	    return beeWorld.getBeeVelocity().getValue();
+	}
+	return 0;
+    }
 }

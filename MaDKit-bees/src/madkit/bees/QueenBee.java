@@ -33,81 +33,63 @@ import madkit.message.ObjectMessage;
  * The leader of a group.
  * 
  * @version 2.0.0.3
- * @author Fabien Michel, Olivier Gutknecht 
-*/
-public class QueenBee extends AbstractBee
-{
-	/**
-	 * 
-	 */
-	private static final long	serialVersionUID	= -6999130646300839798L;
-	static int border = 20;
+ * @author Fabien Michel, Olivier Gutknecht
+ */
+public class QueenBee extends AbstractBee {
 
-	@Override
-	protected void buzz()
-	{
-//		setLogLevel(Level.ALL);
-		Message m = nextMessage();
-		if(m != null){
-			sendReply(m, new ObjectMessage<>(myInformation));
-		}
+    private static final long serialVersionUID = -6999130646300839798L;
+    static int border = 20;
 
-		super.buzz();
-
-		if (beeWorld != null) {
-			// check to see if the queen hits the edge
-			final Point location = myInformation.getCurrentPosition();
-			if (location.x < border || location.x > (beeWorld.getWidth() - border)) {
-				dX = -dX;
-				location.x += (dX);
-			}
-			if (location.y < border	|| location.y > (beeWorld.getHeight() - border)) {
-				dY = -dY;
-				location.y += (dY);
-			}
-		if(logger != null){
-			logger.fine("my env = "+beeWorld);
-			logger.finest(myInformation.getPreviousPosition().toString());
-			logger.finest(myInformation.getCurrentPosition().toString());
-		}
-	}
+    @Override
+    protected void buzz() {
+	Message m = nextMessage();
+	if (m != null) {
+	    sendReply(m, new ObjectMessage<>(myInformation));
 	}
 
-	@Override
-	protected void activate()
-	{
-//		setLogLevel(Level.ALL);
-		requestRole(COMMUNITY,SIMU_GROUP,QUEEN_ROLE,null);
-		requestRole(COMMUNITY,SIMU_GROUP,BEE_ROLE,null);
-		broadcastMessage(COMMUNITY,SIMU_GROUP,FOLLOWER_ROLE, new ObjectMessage<>(myInformation));
-		BeeViewer.nbOfBroadcast++;
-		if(logger != null)
-			logger.info("my initial location"+myInformation.getCurrentPosition());
-	}
+	super.buzz();
 
-	@Override
-	protected void end() {
-		//informing follower that I am leaving
-		BeeViewer.nbOfBroadcast++;
-		broadcastMessage(COMMUNITY,SIMU_GROUP,FOLLOWER_ROLE, new ObjectMessage<>(myInformation));
+	if (beeWorld != null) {
+	    // check to see if the queen hits the edge
+	    final Point location = myInformation.getCurrentPosition();
+	    if (location.x < border || location.x > (beeWorld.getWidth() - border)) {
+		dX = -dX;
+		location.x += (dX);
+	    }
+	    if (location.y < border || location.y > (beeWorld.getHeight() - border)) {
+		dY = -dY;
+		location.y += (dY);
+	    }
 	}
+    }
 
-	@Override
-	protected int getMaxVelocity() {
-		if (beeWorld != null) {
-			return beeWorld.getQueenVelocity().getValue();
-		}
-		return 0;
-	}
-	
-	@Override
-	protected void computeNewVelocities() {
-		if (beeWorld != null) {
-			int acc = beeWorld.getQueenAcceleration().getValue();
-			dX += randomFromRange(acc);
-			dY += randomFromRange(acc);
-		}
-	}
+    @Override
+    protected void activate() {
+	requestRole(COMMUNITY, SIMU_GROUP, QUEEN_ROLE, null);
+	requestRole(COMMUNITY, SIMU_GROUP, BEE_ROLE, null);
+	broadcastMessage(COMMUNITY, SIMU_GROUP, FOLLOWER_ROLE, new ObjectMessage<>(myInformation));
+    }
 
+    @Override
+    protected void end() {
+	broadcastMessage(COMMUNITY, SIMU_GROUP, FOLLOWER_ROLE, new ObjectMessage<>(myInformation));
+    }
+
+    @Override
+    protected int getMaxVelocity() {
+	if (beeWorld != null) {
+	    return beeWorld.getQueenVelocity().getValue();
+	}
+	return 0;
+    }
+
+    @Override
+    protected void computeNewVelocities() {
+	if (beeWorld != null) {
+	    int acc = beeWorld.getQueenAcceleration().getValue();
+	    dX += randomFromRange(acc);
+	    dY += randomFromRange(acc);
+	}
+    }
 
 }

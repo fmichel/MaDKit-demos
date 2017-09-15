@@ -23,74 +23,73 @@ import java.awt.Dimension;
 import javax.swing.DefaultBoundedRangeModel;
 
 /**
- * Class representing the size of the environment and some
- * modeling parameters.
+ * Class representing the size of the environment and some modeling parameters.
  * 
  * @version 2.0.0.3
  * @author Fabien Michel
  */
 public class BeeEnvironment {
 
-	private Dimension	envSize;
-	
-	private DefaultBoundedRangeModel queenAcceleration = new DefaultBoundedRangeModel(5, 1, 0, 21);
-	private DefaultBoundedRangeModel beeAcceleration = new DefaultBoundedRangeModel(3, 1, 0, 21);
-	private DefaultBoundedRangeModel queenVelocity = new DefaultBoundedRangeModel(12, 1, 0, 21);
-	private DefaultBoundedRangeModel beeVelocity = new DefaultBoundedRangeModel(9, 1, 0, 21);
-    
-	/**
-	 * @return the queenAcceleration
-	 */
-	public DefaultBoundedRangeModel getQueenAcceleration() {
-		return queenAcceleration;
-	}
+    private Dimension envSize;
 
-	/**
-	 * @return the beeAcceleration
-	 */
-	public DefaultBoundedRangeModel getBeeAcceleration() {
-		return beeAcceleration;
-	}
+    private final DefaultBoundedRangeModel queenAcceleration = new DefaultBoundedRangeModel(5, 1, 0, 21);
+    private final DefaultBoundedRangeModel beeAcceleration = new DefaultBoundedRangeModel(3, 1, 0, 21);
+    private final DefaultBoundedRangeModel queenVelocity = new DefaultBoundedRangeModel(12, 1, 0, 21);
+    private final DefaultBoundedRangeModel beeVelocity = new DefaultBoundedRangeModel(9, 1, 0, 21);
 
-	/**
-	 * @return the queenVelocity
-	 */
-	public DefaultBoundedRangeModel getQueenVelocity() {
-		return queenVelocity;
-	}
+    /**
+     * @return the queenAcceleration
+     */
+    public DefaultBoundedRangeModel getQueenAcceleration() {
+	return queenAcceleration;
+    }
 
-	/**
-	 * @return the beeVelocity
-	 */
-	public DefaultBoundedRangeModel getBeeVelocity() {
-		return beeVelocity;
-	}
+    /**
+     * @return the beeAcceleration
+     */
+    public DefaultBoundedRangeModel getBeeAcceleration() {
+	return beeAcceleration;
+    }
 
-	public int getWidth() {
-		return envSize.width;
-	}
+    /**
+     * @return the queenVelocity
+     */
+    public DefaultBoundedRangeModel getQueenVelocity() {
+	return queenVelocity;
+    }
 
-	public int getHeight() {
-		return envSize.height;
-	}
+    /**
+     * @return the beeVelocity
+     */
+    public DefaultBoundedRangeModel getBeeVelocity() {
+	return beeVelocity;
+    }
 
-	public BeeEnvironment() {
-		this(new Dimension());
-	}
+    public int getWidth() {
+	return envSize.width;
+    }
 
-	/**
-	 * @param envSize
-	 */
-	public BeeEnvironment(Dimension envSize) {
-		this.envSize = envSize;
-	}
+    public int getHeight() {
+	return envSize.height;
+    }
 
-	/**
-	 * @param envSize the envSize to set
-	 */
-	public final void setEnvSize(Dimension envSize) {
-		this.envSize = envSize;
-	}
+    public BeeEnvironment() {
+	this(new Dimension());
+    }
+
+    /**
+     * @param envSize
+     */
+    public BeeEnvironment(Dimension envSize) {
+	this.envSize = envSize;
+    }
+
+    /**
+     * @param envSize
+     *            the envSize to set
+     */
+    public final void setEnvSize(Dimension envSize) {
+	this.envSize = envSize;
+    }
 
 }
-

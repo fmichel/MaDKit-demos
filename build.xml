@@ -26,8 +26,8 @@
 	<property name="release.dir" value="release" />
 	<property name="demo.dir" value="${basedir}/release" />
 	<property name="lib.dir" value="lib" />
-	<property name="madkit.version" value="5.0.5.3" />
-	<property name="madkit.old.version" value="5.0.5.2" />
+	<property name="madkit.version" value="5.2" />
+	<property name="madkit.old.version" value="5.1.1" />
 	<property name="madkit.demos.dir" location="${madkit.dir}/demos" />
 	<property name="madkit.jar.file" value="../${madkit.dir}/release/madkit-${madkit.version}.jar" />
 	<property name="jnlps.web.dir" value="jnlps" />
@@ -192,14 +192,14 @@
           target:       ftp-push-agent-libs        
          ================================= -->
 	<target name="ftp-push-agent-libs" depends="build-agent-jars" description="ftp demo libs">
-		<property name="server" value="MDK-demos" />
+		<property name="server" value="MDK.net" />
 		<property name="ftp.propfile" location="${user.home}/${mdk.store.dir}/${server}" />
 		<loadproperties srcFile="${ftp.propfile}" />
-		<ftp server="${ftp.server}" userid="${ftp.user}" password="${ftp.password}" action="mkdir" remotedir="${ftp.dir}/${demo-lib.web.dir}/${agents-lib.web.dir}"/>
-		<ftp server="${ftp.server}" userid="${ftp.user}" password="${ftp.password}" action="put" remotedir="${ftp.dir}/${demo-lib.web.dir}/${agents-lib.web.dir}">
+		<ftp server="${ftp.server}" userid="${ftp.user}" password="${ftp.password}" action="mkdir" remotedir="${ftp.dir}/repository/${demo-lib.web.dir}/${agents-lib.web.dir}"/>
+		<ftp server="${ftp.server}" userid="${ftp.user}" password="${ftp.password}" action="put" remotedir="${ftp.dir}/repository/${demo-lib.web.dir}/${agents-lib.web.dir}">
 			<fileset dir="${release.dir}" includes="*.agents.jar" />
 		</ftp>
-		<echo>FTP upload of Demo libs : target is ${ftp.server} ${ftp.dir}/${demo-lib.web.dir}</echo>
+		<echo>FTP upload of Demo libs : target is ${ftp.server} ${ftp.dir}/repository/${demo-lib.web.dir}</echo>
 	</target>
 
 	<!-- - - - - - - - - - - - - - - - - - 

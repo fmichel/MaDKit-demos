@@ -21,9 +21,7 @@ package madkit.bees;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Level;
 
-import madkit.action.KernelAction;
 import madkit.kernel.AbstractAgent;
 import madkit.kernel.Message;
 import madkit.message.EnumMessage;
@@ -34,180 +32,137 @@ import madkit.message.EnumMessage;
  * @version 2.0.0.3
  * @author Fabien Michel
  */
-public class BeeLauncher extends madkit.kernel.Agent
-{
-	/**
-	 * 
-	 */
-	private static final long	serialVersionUID	= 7558468322705057201L;
-	public static final String SIMU_GROUP = "bees";
-	public static final String BEE_ROLE = "bee";
-	public static final String QUEEN_ROLE = "queen";
-	public static final String FOLLOWER_ROLE = "follower";
-	public static final String VIEWER_ROLE = "viewer";
-	public static final String SCHEDULER_ROLE = "scheduler";
-	public static final String LAUNCHER_ROLE = "launcher";
-	public static final String COMMUNITY = "buzz";
-	//	public String communityID = COMMUNITY;
+public class BeeLauncher extends madkit.kernel.Agent {
 
-	private int beenumber = 30000;
-	private ArrayList<AbstractAgent> queensList = new ArrayList<>();
-	private ArrayList<AbstractAgent> beesList = new ArrayList<>(beenumber*2);
-	private boolean randomMode=true;
-	private BeeViewer beeViewer;
-	private boolean alive = true;
+    public static final String SIMU_GROUP = "bees";
+    public static final String BEE_ROLE = "bee";
+    public static final String QUEEN_ROLE = "queen";
+    public static final String FOLLOWER_ROLE = "follower";
+    public static final String VIEWER_ROLE = "viewer";
+    public static final String SCHEDULER_ROLE = "scheduler";
+    public static final String LAUNCHER_ROLE = "launcher";
+    public static final String COMMUNITY = "buzz";
 
-	protected void activate()
-	{
-		//	communityID = COMMUNITY;
-		//	int i=2;
-		//	while(isCommunity(communityID)){
-		//		communityID+="_"+i++;
-		//	}
-		setLogLevel(Level.INFO);
-		if(logger != null)
-			logger.info("Launching bees simulation...");
-		createGroup(COMMUNITY,SIMU_GROUP,false,null);
-		requestRole(COMMUNITY,SIMU_GROUP,LAUNCHER_ROLE,null);
+    private static final int INITIAL_BEES_NB = 30000;
+    private ArrayList<AbstractAgent> queensList = new ArrayList<>();
+    private ArrayList<AbstractAgent> beesList = new ArrayList<>(INITIAL_BEES_NB * 2);
+    private boolean randomMode = true;
 
+    @Override
+    protected void activate() {
+	getLogger().info(() -> "Launching bees simulation...");
+	createGroup(COMMUNITY, SIMU_GROUP, false, null);
+	requestRole(COMMUNITY, SIMU_GROUP, LAUNCHER_ROLE, null);
 
-		long timeL = System.nanoTime();
-		launchBees(beenumber);
-		if(logger != null)
-			logger.fine("launch time : "+(System.nanoTime()-timeL));
+	long startTime = System.nanoTime();
+	launchBees(INITIAL_BEES_NB);
+	getLogger().info(() -> "launch time : " + (System.nanoTime() - startTime));
 
-//		launchQueens(1);
-		BeeScheduler beeScheduler = new BeeScheduler(COMMUNITY);
-		beeViewer=new BeeViewer(beeScheduler,COMMUNITY);
-		launchAgent(beeViewer,true);
+	BeeScheduler beeScheduler = new BeeScheduler();
+	launchAgent(beeScheduler, false);
+	BeeViewer beeViewer = new BeeViewer(beeScheduler);
+	launchAgent(beeViewer, true);
 
-		launchAgent(beeScheduler,false);
-		
-		pause(4000);
-		launchQueens(1);
+	pause(3000);
+	launchQueens(1);
+    }
 
-	}
+    /**
+     * So that I can react to {@link BeeLauncherAction#RANDOM_MODE} message
+     */
+    @SuppressWarnings("unused")
+    private void randomMode(boolean on) {
+	randomMode = on;
+    }
 
-	/**
-	 * So that I can react to {@link KernelAction#EXIT} message
-	 */
-	@SuppressWarnings("unused")
-	private void exit() {
-		alive = false;
-	}
+    enum BeeLauncherAction {
 
-	/**
-	 * So that I can react to {@link BeeLauncherAction#RANDOM_MODE} message
-	 */
-	@SuppressWarnings("unused")
-	private void randomMode(boolean on){
-		randomMode = on;
-	}
+	RANDOM_MODE,
+	LAUNCH_BEES,
+    }
 
-	enum BeeLauncherAction{
-
-		RANDOM_MODE,
-		LAUNCH_BEES,
-	}
-
-	protected void live()
-	{
-		while(alive)
-		{
-			Message m = waitNextMessage(500 + (int) (Math.random()*2000) );
-			if(m != null){
-				proceedEnumMessage((EnumMessage<?>) m);
-			}
-			if(randomMode)
-			{
-				killBees(false, 150);
-				if(Math.random()<.8)
-				{
-					if(Math.random()<.5)
-					{
-						if(queensList.size()>1)
-							if(queensList.size()>7)
-								killBees(true, (int) (Math.random()*7) + 1);
-							else
-								killBees(true, (int) (Math.random()*2) + 1);
-					}
-					else if(queensList.size() < 10)
-						launchQueens((int) (Math.random()*2) + 1);
-				}
-				else
-					if(Math.random()<.3)
-					{
-						if(beesList.size() < 200000 && Runtime.getRuntime().freeMemory() > 100000){
-							launchBees((int) (Math.random()*15000) + 5000);
-							//						System.err.println(Runtime.getRuntime().freeMemory());
-						}
-					}
-					else{
-						killBees(false, (int) (Math.random()*500) + 1);
-					}
-			}		
+    @Override
+    protected void live() {
+	while (isAlive()) {
+	    Message m = waitNextMessage(500 + (int) (Math.random() * 2000));
+	    if (m != null) {
+		proceedEnumMessage((EnumMessage<?>) m);
+	    }
+	    if (randomMode) {
+		killBees(false, 150);
+		if (Math.random() < .8) {
+		    if (Math.random() < .5) {
+			if (queensList.size() > 1)
+			    if (queensList.size() > 7)
+				killBees(true, (int) (Math.random() * 7) + 1);
+			    else
+				killBees(true, (int) (Math.random() * 2) + 1);
+		    }
+		    else if (queensList.size() < 10)
+			launchQueens((int) (Math.random() * 2) + 1);
 		}
-	}
-
-	@Override
-	protected void end() {
-//		queensList.clear();
-		queensList = null;
-//		beesList.clear();
-		beesList = null;
-		if(logger != null)
-			logger.info("I am done. Bye !");
-	}
-
-	private void launchBees(int numberOfBees)
-	{
-		if(logger != null)
-			logger.info("Launching "+numberOfBees+" bees");
-			beesList.addAll(
-					launchAgentBucket(
-							Bee.class.getName(),
-							numberOfBees, 
-							COMMUNITY+","+SIMU_GROUP+","+BEE_ROLE, 
-							COMMUNITY+","+SIMU_GROUP+","+FOLLOWER_ROLE));
-	}	
-
-	private void launchQueens(int numberOfQueens)
-	{
-		if(logger != null)
-			logger.info("Launching "+numberOfQueens+" queen bees");
-		queensList.addAll(launchAgentBucket(
-				QueenBee.class.getName(),
-				numberOfQueens, 
-				COMMUNITY+","+SIMU_GROUP+","+BEE_ROLE, 
-				COMMUNITY+","+SIMU_GROUP+","+QUEEN_ROLE));
-	}	
-
-	private void killBees(boolean queen,int number)
-	{
-		List<AbstractAgent> l;
-		int j = 0;
-		if(queen)
-			l = queensList;
-		else
-			l = beesList;
-		for(final Iterator<AbstractAgent> i = l.iterator();i.hasNext() && j < number;j++)
-		{
-			if (j % 100 == 0) {
-				Thread.yield();
-			}
-			final AbstractAgent a = i.next();
-			if(a != null)
-			{
-				i.remove();
-				killAgent(a);
-			}
-			else
-				break;
+		else if (Math.random() < .3) {
+		    if (beesList.size() < 200000 && Runtime.getRuntime().freeMemory() > 100000) {
+			launchBees((int) (Math.random() * 15000) + 5000);
+		    }
 		}
+		else {
+		    killBees(false, (int) (Math.random() * 500) + 1);
+		}
+	    }
 	}
+    }
 
-	public static void main(String[] args) {
-		executeThisAgent(1,false,args);
+    @Override
+    protected void end() {
+	queensList = null;
+	beesList = null;
+	getLogger().info("I am done. Bye !");
+    }
+
+    private void launchBees(int numberOfBees) {
+	getLogger().info(() -> "Launching " + numberOfBees + " bees");
+	//greatly optimizes the launching time
+	final List<AbstractAgent> beesBucket = launchAgentBucket(
+		Bee.class.getName(), 
+		numberOfBees, 
+		COMMUNITY + "," + SIMU_GROUP + "," + BEE_ROLE,
+		COMMUNITY + "," + SIMU_GROUP + "," + FOLLOWER_ROLE);
+	beesList.addAll(beesBucket);
+    }
+
+    private void launchQueens(int numberOfQueens) {
+	getLogger().info(() -> "Launching " + numberOfQueens + " queen bees");
+	for (int i = 0; i < numberOfQueens; i++) {
+	    final QueenBee newQueen = new QueenBee();
+	    launchAgent(newQueen);
+	    queensList.add(newQueen);
 	}
+    }
+
+    private void killBees(boolean queen, int number) {
+	List<AbstractAgent> l;
+	int j = 0;
+	if (queen)
+	    l = queensList;
+	else
+	    l = beesList;
+	for (final Iterator<AbstractAgent> i = l.iterator(); i.hasNext() && j < number; j++) {
+	    if (j % 100 == 0) {
+		Thread.yield();
+	    }
+	    final AbstractAgent a = i.next();
+	    if (a != null) {
+		i.remove();
+		killAgent(a);
+	    }
+	    else
+		break;
+	}
+    }
+
+    public static void main(String[] args) {
+	executeThisAgent(1, false, args);
+    }
 
 }

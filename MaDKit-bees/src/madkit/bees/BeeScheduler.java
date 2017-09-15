@@ -19,12 +19,12 @@
 package madkit.bees;
 
 import static madkit.bees.BeeLauncher.BEE_ROLE;
+import static madkit.bees.BeeLauncher.COMMUNITY;
 import static madkit.bees.BeeLauncher.SCHEDULER_ROLE;
 import static madkit.bees.BeeLauncher.SIMU_GROUP;
 
-import java.util.logging.Level;
-
 import madkit.action.SchedulingAction;
+import madkit.kernel.AbstractAgent;
 import madkit.kernel.Message;
 import madkit.message.ObjectMessage;
 import madkit.message.SchedulingMessage;
@@ -32,57 +32,46 @@ import madkit.simulation.activator.GenericBehaviorActivator;
 
 /**
  * @version 2.0.0.2
- * @author Fabien Michel, Olivier Gutknecht 
+ * @author Fabien Michel, Olivier Gutknecht
  */
-public class BeeScheduler extends madkit.kernel.Scheduler
-{
+public class BeeScheduler extends madkit.kernel.Scheduler {
 
-	private static final long serialVersionUID = -6881984366833257439L;
-	private String community;
-	private GenericBehaviorActivator<AbstractBee> bees;
-	private GenericBehaviorActivator<BeeViewer> viewer;
+    private GenericBehaviorActivator<AbstractBee> bees;
 
-	BeeScheduler(String community){
-		this.community = community;
+    @Override
+    public void activate() {
+	super.activate();
+	requestRole(COMMUNITY, SIMU_GROUP, SCHEDULER_ROLE);
+	bees = new GenericBehaviorActivator<>(COMMUNITY, SIMU_GROUP, BEE_ROLE, "buzz");
+	addActivator(bees);
+	GenericBehaviorActivator<AbstractAgent> viewer = new GenericBehaviorActivator<>(COMMUNITY, SIMU_GROUP, "bee observer", "observe");
+	addActivator(viewer);
+	// auto starting myself the agent way
+	receiveMessage(new SchedulingMessage(SchedulingAction.RUN));
+    }
+
+    /**
+     * Overriding just for adding the multicore option
+     * 
+     * @see madkit.kernel.Scheduler#checkMail(madkit.kernel.Message)
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    protected void checkMail(Message m) {
+	if (m != null) {
+	    try {
+		boolean mutiCore = ((ObjectMessage<Boolean>) m).getContent();
+		if (mutiCore) {
+		    bees.useMulticore(Runtime.getRuntime().availableProcessors());
+		}
+		else {
+		    bees.useMulticore(1);
+		}
+	    }
+	    catch(ClassCastException e) {
+		super.checkMail(m);// default behavior
+	    }
 	}
-
-	public void activate()
-	{
-		super.activate();
-		getLogger().setWarningLogLevel(Level.INFO);
-		setLogLevel(Level.ALL);
-		setLogLevel(Level.OFF);
-		requestRole("buzz",SIMU_GROUP,SCHEDULER_ROLE,null);
-		bees = new GenericBehaviorActivator<>(community,SIMU_GROUP,BEE_ROLE,"buzz");
-		addActivator(bees);
-		viewer = new GenericBehaviorActivator<>(community,SIMU_GROUP,"bee observer","observe");
-		addActivator(viewer);
-		setDelay(20);
-		setDelay(0);
-		//auto starting myself the agent way
-		receiveMessage(new SchedulingMessage(SchedulingAction.RUN));
-	}
-
-	/**
-	 * Overriding just for adding the multicore option
-	 * @see madkit.kernel.Scheduler#checkMail(madkit.kernel.Message)
-	 */
-	@SuppressWarnings("unchecked")
-	@Override
-	protected void checkMail(Message m) {
-		if (m != null) {
-			try {
-				boolean mutiCore = ((ObjectMessage<Boolean>) m).getContent();
-				if (mutiCore) {
-					bees.useMulticore(Runtime.getRuntime().availableProcessors());
-				}
-				else{
-					bees.useMulticore(1);
-				}
-			} catch (ClassCastException e) {
-				super.checkMail(m);//default behavior
-			}
-		}		 
-	}
+    }
 
 }
